@@ -1,7 +1,7 @@
 import 'package:postgres/postgres.dart';
+import 'package:spotify_library/model/artist.dart';
 
 class PostgresDatabase {
-  //Todo: complete file to create correct tables see (https://github.com/beautybird/Flutter-with-Postgresql-using-Models-class/blob/master/lib/database/app_database.dart)
 
   PostgreSQLConnection? connection;
 
@@ -12,7 +12,7 @@ class PostgresDatabase {
       5432,
       'initial_db',
       username: 'postgres',
-      password: '',
+      password: 'o!tCl9D74ozR',
       timeoutInSeconds: 60,
       queryTimeoutInSeconds: 60,
       timeZone: 'UTC',
@@ -22,16 +22,30 @@ class PostgresDatabase {
         : connection);
   }
 
-  //Method for testing if database works
-  String newDataFuture = '';
-
-  Future<String> getData(String songName) async {
+  //Get all artists with a given artistName
+  Future<List<Artist>> searchArtists(String artistName) async {
     try {
       await connection!.open();
+      await connection!.transaction((newConnection) async {
+        List<Map<String, Map<String, dynamic>>> artistResults = await newConnection.mappedResultsQuery(
+          'select * from artist where artist_name like %@artistName% ',
+          substitutionValues: {'artistName': artistName},
+          allowReuse: true,
+          timeoutInSeconds: 30,
+        );
+        //map results
+        List<Artist> artists;
+        for (final row in artistResults) {
+          var name = row["artist_name"];
+          var profilePicture = row["profile_picture"];
+          Artist newArtist = new Artist(name: name, profilePicture: profilePicture);
+          artists.add(newArtist);
+        }
+      });
     }
-    catch (exc) {
-      newDataFuture = 'error';
+    catch (exc){
+      exc.toString();
     }
-    return newDataFuture;
-  }
+  return artists;
+}
 }
