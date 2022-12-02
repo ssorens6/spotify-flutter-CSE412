@@ -24,6 +24,7 @@ class PostgresDatabase {
 
   //Get all artists with a given artistName
   Future<List<Artist>> searchArtists(String artistName) async {
+    List<Artist> artists = [];
     try {
       await connection!.open();
       await connection!.transaction((newConnection) async {
@@ -34,11 +35,10 @@ class PostgresDatabase {
           timeoutInSeconds: 30,
         );
         //map results
-        List<Artist> artists;
         for (final row in artistResults) {
-          var name = row["artist_name"];
-          var profilePicture = row["profile_picture"];
-          Artist newArtist = new Artist(name: name, profilePicture: profilePicture);
+          String name = row["artist_name"].toString();
+          String profilePicture = row["profile_picture"].toString();
+          Artist newArtist = Artist(name: name, profilePicture: profilePicture);
           artists.add(newArtist);
         }
       });
