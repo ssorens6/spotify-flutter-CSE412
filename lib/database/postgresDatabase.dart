@@ -20,28 +20,24 @@ class PostgresDatabase {
       isUnixSocket: false,
     )
         : connection);
-    print("connection complete");
   }
 
   //Get all artists with a given artistName
   Future<List<Artist>> searchArtists(String artistName) async {
-    print("Gettting search results");
     List<Artist> artists = [];
     try {
       await connection!.open();
-      print("connection open");
       await connection!.transaction((newConnection) async {
         List<Map<String, Map<String, dynamic>>> artistResults = await newConnection.mappedResultsQuery(
-          'select * from artist where artist_name like %@artistName%',
+          "select * from artist where artist_name = @artistName",
           substitutionValues: {'artistName': artistName},
           allowReuse: true,
           timeoutInSeconds: 30,
         );
         //map results
         for (final row in artistResults) {
-          String name = row["artist_name"].toString();
-          print(name);
-          String profilePicture = row["profile_picture"].toString();
+          String name = row["artist"]!["artist_name"];
+          String profilePicture = row["artist"]!["profile_picture"];
           Artist newArtist = Artist(name: name, profilePicture: profilePicture);
           artists.add(newArtist);
         }

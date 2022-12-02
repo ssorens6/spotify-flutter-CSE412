@@ -62,7 +62,7 @@ class _SearchState extends State<Search> {
                   //artist tag is selected in search
                   case 2: {
                     //get artists from postgres
-                    PostgresDatabase().searchArtists("B").then((fetchedArtists) =>
+                    PostgresDatabase().searchArtists("BTS").then((fetchedArtists) =>
                         fetchedArtists.forEach((artist) =>
                             print(artist)
                         )
