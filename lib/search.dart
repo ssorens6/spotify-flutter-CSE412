@@ -14,6 +14,14 @@ class _SearchState extends State<Search> {
   List<String> options = [
     'Song', 'Album', 'Artist',
   ];
+  final searchTextController = TextEditingController();
+  String searchText = "";
+
+  void _setText() {
+    setState(() {
+      searchText = searchTextController.text;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -28,6 +36,7 @@ class _SearchState extends State<Search> {
             decoration: InputDecoration(
                 border: OutlineInputBorder(),
             ),
+            controller: searchTextController,
           ),
       ChipsChoice<int>.single(
         value: tag,
@@ -45,24 +54,32 @@ class _SearchState extends State<Search> {
                 color: Colors.green, borderRadius: BorderRadius.circular(20)),
             child: TextButton(
               onPressed: () {
-                //Todo: display search results\
-                print("MAde it here");
-                print(tag);
+                _setText();
                 switch(tag) {
                   // song tag is selected in search
                   case 0: {
-
+                    //get songs from postgres
+                    PostgresDatabase().searchSongs(searchText).then((fetchedSongs) =>
+                        fetchedSongs.forEach((song) =>
+                            print(song)
+                        )
+                    );
                   }
                   break;
                   //album tag is selected in search
                   case 1: {
-
+                    //get albums from postgres
+                    PostgresDatabase().searchAlbums(searchText).then((fetchedAlbums) =>
+                        fetchedAlbums.forEach((album) =>
+                            print(album)
+                        )
+                    );
                   }
                   break;
                   //artist tag is selected in search
                   case 2: {
                     //get artists from postgres
-                    PostgresDatabase().searchArtists("BTS").then((fetchedArtists) =>
+                    PostgresDatabase().searchArtists(searchText).then((fetchedArtists) =>
                         fetchedArtists.forEach((artist) =>
                             print(artist)
                         )
