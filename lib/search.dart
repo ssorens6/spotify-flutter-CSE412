@@ -1,5 +1,8 @@
 import 'package:chips_choice/chips_choice.dart';
 import 'package:flutter/material.dart';
+import 'package:spotify_library/database/postgresDatabase.dart';
+
+import 'model/artist.dart';
 
 class Search extends StatefulWidget {
   @override
@@ -42,7 +45,31 @@ class _SearchState extends State<Search> {
                 color: Colors.green, borderRadius: BorderRadius.circular(20)),
             child: TextButton(
               onPressed: () {
-                //Todo: display search results
+                //Todo: display search results\
+                print("MAde it here");
+                print(tag);
+                switch(tag) {
+                  // song tag is selected in search
+                  case 0: {
+
+                  }
+                  break;
+                  //album tag is selected in search
+                  case 1: {
+
+                  }
+                  break;
+                  //artist tag is selected in search
+                  case 2: {
+                    //get artists from postgres
+                    PostgresDatabase().searchArtists("B").then((fetchedArtists) =>
+                        fetchedArtists.forEach((artist) =>
+                            print(artist)
+                        )
+                    );
+                  }
+                  break;
+                }
               },
               child: Text(
                 'Search',
