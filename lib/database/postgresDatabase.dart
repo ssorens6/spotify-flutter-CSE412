@@ -136,4 +136,19 @@ class PostgresDatabase {
     }
     return validUser;
   }
+
+  //adds a song to database
+  Future<String> addSong(String songTitle, String artistName, String albumName) async {
+    String newSongFuture = '';
+
+    return newSongFuture;
+  }
+
+  //edits a song in database
+  Future<String> editSong(String songTitle, String artistName, String albumName) async {
+    String newSongFuture = '';
+
+    return newSongFuture;
+  }
+
 }
