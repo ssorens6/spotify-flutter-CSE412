@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
+import 'package:spotify_library/editSong.dart';
 import 'model/album.dart';
 import 'model/song.dart';
 
@@ -113,7 +114,7 @@ class _SongInfoState extends State<SongInfo> {
             child: TextButton(
                 onPressed: () {
                   //redirect back to search
-                  Navigator.pop(context);
+                  Navigator.of(context).push(MaterialPageRoute(builder: (context)=>const EditSong()));
                 },
                 child: Text("Edit Song Information")
             ),
