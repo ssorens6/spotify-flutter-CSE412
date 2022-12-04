@@ -114,7 +114,7 @@ class _SongInfoState extends State<SongInfo> {
             child: TextButton(
                 onPressed: () {
                   //redirect back to search
-                  Navigator.of(context).push(MaterialPageRoute(builder: (context)=>const EditSong()));
+                  Navigator.of(context).push(MaterialPageRoute(builder: (context)=>EditSong(songToBeChanged: widget.selectedSong)));
                 },
                 child: Text("Edit Song Information")
             ),

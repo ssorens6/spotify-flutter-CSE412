@@ -278,11 +278,51 @@ class PostgresDatabase {
     return newSongFuture;
   }
 
-  //edits a song in database
-  Future<String> editSong(String songTitle, String artistName, String albumName) async {
+//edits a song in database
+  PostgreSQLResult? addSongResult, deleteSongResult, deleteLibResult;
+  Future<String> editSong(String oldSongTitle, String newSongTitle, String artistName, String albumName, String average_rating) async {
     String newSongFuture = '';
+    try {
+      await connection!.open();
+      await connection!.transaction((newConnection) async {
+        deleteLibResult = await newConnection.query(
+          'delete from lib where l_song_title=@oldSongTitle',
+          substitutionValues: {
+            'oldSongTitle': oldSongTitle
+          },
+          allowReuse: true,
+          timeoutInSeconds: 30,
+        );
 
+        deleteSongResult = await newConnection.query(
+          'delete from song where song_title=@oldSongTitle',
+          substitutionValues: {
+            'oldSongTitle': oldSongTitle
+          },
+          allowReuse: true,
+          timeoutInSeconds: 30,
+        );
+
+        addSongResult = await newConnection.query(
+          'insert into song(s_artist_name, s_album_name, song_title, average_rating) '
+              'values (@artistName, @albumName, @newSongTitle, @rating)',
+          substitutionValues: {
+            'artistName': artistName,
+            'albumName': albumName,
+            'newSongTitle': newSongTitle,
+            'rating': 3
+          },
+          allowReuse: true,
+          timeoutInSeconds: 30,
+        );
+        newSongFuture = (addSongResult!.affectedRowCount > 0 ? 'upd' : 'nop');
+      });
+    } catch (exc) {
+      newSongFuture = 'exc';
+      print(exc.toString());
+    }
     return newSongFuture;
   }
+
 
 }
