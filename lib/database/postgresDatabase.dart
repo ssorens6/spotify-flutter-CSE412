@@ -111,6 +111,36 @@ class PostgresDatabase {
     return songs;
   }
 
+  //Get all albums with a given a_artist_name
+  Future<List<Album>> searchAlbumsByArtist(String artistSearchName) async {
+    List<Album> albums = [];
+    try {
+      await connection!.open();
+      await connection!.transaction((newConnection) async {
+        List<Map<String, Map<String, dynamic>>> albumResults = await newConnection.mappedResultsQuery(
+          "select * from album where a_artist_name = @artistSearchName",
+          substitutionValues: {'artistSearchName': artistSearchName},
+          allowReuse: true,
+          timeoutInSeconds: 30,
+        );
+        //map results
+        for (final row in albumResults) {
+          String albumName= row["album"]!["album_name"];
+          String coverPicture = row["album"]!["album_cover"];
+          String releaseDate = row["album"]!["release_date"];
+          String artistName = row["album"]!["a_artist_name"];
+          Album newAlbum = Album(albumCoverImage: coverPicture, albumName: albumName,
+              releaseDate: releaseDate, artistName: artistName);
+          albums.add(newAlbum);
+        }
+      });
+    }
+    catch (exc){
+      print(exc.toString());
+    }
+    return albums;
+  }
+
   //Check if valid user
   Future<bool> checkValidUser(String username, String password) async {
     bool validUser = false;
@@ -137,10 +167,114 @@ class PostgresDatabase {
     return validUser;
   }
 
-  //adds a song to database
-  Future<String> addSong(String songTitle, String artistName, String albumName) async {
-    String newSongFuture = '';
+  Future<List<Song>> searchSongsbyAlbum(String albumSearchName) async {
+    List<Song> songs = [];
+    try {
+      await connection!.open();
+      await connection!.transaction((newConnection) async {
+        List<Map<String, Map<String, dynamic>>> albumResults = await newConnection.mappedResultsQuery(
+          "select * from song where s_album_name = @albumSearchName",
+          substitutionValues: {'albumSearchName': albumSearchName},
+          allowReuse: true,
+          timeoutInSeconds: 30,
+        );
+        //map results
+        for (final row in albumResults) {
+          String songTitle = row["song"]!["song_title"];
+          String albumName = row["song"]!["s_album_name"];
+          int averageRating = row["song"]!["average_rating"];
+          String artistName = row["song"]!["s_artist_name"];
+          Song newSong = Song(artistName: artistName, albumName: albumName,
+              songTitle: songTitle, averageRating: averageRating);
+          songs.add(newSong);
+        }
+      });
+    }
+    catch (exc){
+      print(exc.toString());
+    }
+    return songs;
+  }
 
+//adds a song to database
+  PostgreSQLResult? newSongResult, newAlbumResult, newArtistResult;
+  PostgreSQLResult? songExists, artistExists, albumExists;
+  Future<String> addSong(String songTitle, String artistName, String albumName, String albumCover, String profilePic, String releaseDate) async {
+    String newSongFuture = '';
+    try {
+      await connection!.open();
+      await connection!.transaction((newConnection) async {
+        songExists = await newConnection.query(
+          "select * from song where song_title = @songTitle",
+          substitutionValues: {'songTitle': songTitle},
+          allowReuse: true,
+          timeoutInSeconds: 30,
+        );
+        albumExists = await newConnection.query(
+          "select * from album where album_name = @albumName",
+          substitutionValues: {'albumName': albumName},
+          allowReuse: true,
+          timeoutInSeconds: 30,
+        );
+        artistExists = await newConnection.query(
+          "select * from artist where artist_name = @artistName",
+          substitutionValues: {'artistName': artistName},
+          allowReuse: true,
+          timeoutInSeconds: 30,
+        );
+        if (songExists!.affectedRowCount > 0) {
+          newSongFuture = 'alr';
+        } else {
+          if (albumExists!.affectedRowCount > 0) {
+            //album exists, do nothing
+          } else {
+            if (artistExists!.affectedRowCount > 0) {
+              //artist exists, do nothing
+            } else {
+              newArtistResult = await newConnection.query(
+                'insert into artist(artist_name, profile_picture) '
+                    'values (@artistName, @profilePic)',
+                substitutionValues: {
+                  'artistName': artistName,
+                  'profilePic': profilePic,
+                },
+                allowReuse: true,
+                timeoutInSeconds: 30,
+              );
+            }
+            newAlbumResult = await newConnection.query(
+              'insert into album(a_artist_name, album_cover, album_name, release_date) '
+                  'values (@artistName, @albumCover, @albumName, @releaseDate)',
+              substitutionValues: {
+                'artistName': artistName,
+                'albumCover': albumCover,
+                'albumName': albumName,
+                'releaseDate': releaseDate
+              },
+              allowReuse: true,
+              timeoutInSeconds: 30,
+            );
+          }
+          newSongResult = await newConnection.query(
+            'insert into song(s_artist_name, s_album_name, song_title, average_rating) '
+                'values (@artistName, @albumName, @songName, @rating)',
+            substitutionValues: {
+              'artistName': artistName,
+              'albumName': albumName,
+              'songName': songTitle,
+              'rating': 0
+            },
+            allowReuse: true,
+            timeoutInSeconds: 30,
+          );
+          newSongFuture = (newSongResult!.affectedRowCount > 0 ? 'reg' : 'nop');
+        }
+      });
+    }
+    catch (exc){
+      newSongFuture = 'exc';
+      exc.toString();
+    }
     return newSongFuture;
   }
 

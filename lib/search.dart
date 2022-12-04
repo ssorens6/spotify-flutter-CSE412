@@ -1,7 +1,11 @@
 import 'package:chips_choice/chips_choice.dart';
 import 'package:flutter/material.dart';
+import 'package:spotify_library/addSong.dart';
 import 'package:spotify_library/database/postgresDatabase.dart';
+import 'package:spotify_library/songInfo.dart';
 
+import 'albumInfo.dart';
+import 'artistInfo.dart';
 import 'model/album.dart';
 import 'model/artist.dart';
 import 'model/song.dart';
@@ -146,6 +150,16 @@ class _SearchState extends State<Search> {
         if(foundSongs.isEmpty) {
           return [
             Text('No results found'),
+            Align(
+              alignment: AlignmentDirectional(-0.8, 0),
+              child: TextButton(
+                  onPressed: () {
+                    //redirect back to search
+                    Navigator.of(context).push(MaterialPageRoute(builder: (context)=>AddSong()));
+                  },
+                  child: Text("Add Song?")
+              ),
+            ),
           ];
         }
         else {
@@ -153,7 +167,12 @@ class _SearchState extends State<Search> {
           foundSongs.forEach((element)=>{
             songWidgetTiles.add(TextButton(
                 onPressed: () {
-                  //Todo: redirect to album site
+                  //Query database for song's album
+                  PostgresDatabase().searchAlbums(element.albumName).then((fetchedAlbums) =>
+                  {
+                    //redirect to artist site
+                    Navigator.of(context).push(MaterialPageRoute(builder: (context)=>SongInfo(selectedSong: element, songAlbum: fetchedAlbums[0])))
+                  });
                 },
                 child: Text(element.songTitle)
             )),
@@ -175,7 +194,12 @@ class _SearchState extends State<Search> {
           foundAlbums.forEach((element)=>{
             albumWidgetTiles.add(TextButton(
                 onPressed: () {
-                  //Todo: redirect to album site
+                  //query database for songs that are in the album
+                  PostgresDatabase().searchSongsbyAlbum(element.albumName).then((fetchedAlbumSongs) =>
+                  {
+                    //redirect to album site
+                    Navigator.of(context).push(MaterialPageRoute(builder: (context)=>AlbumInfo(selectedAlbum: element, albumSongs: fetchedAlbumSongs,)))
+                  });
                 },
                 child: Text(element.albumName)
             )),
@@ -196,7 +220,13 @@ class _SearchState extends State<Search> {
           foundArtists.forEach((element)=>{
             artistWidgetTiles.add(TextButton(
                 onPressed: () {
-                  //Todo: redirect to artist site
+                  //query database for all albums by artist
+                  PostgresDatabase().searchAlbumsByArtist(element.name).then((fetchedArtistAlbums) =>
+                  {
+                  //redirect to artist site
+                  Navigator.of(context).push(MaterialPageRoute(builder: (context)=>ArtistInfo(selectedArtist: element, artistAlbums: fetchedArtistAlbums,)))
+                  });
+
             },
                 child: Text(element.name)
             )),
