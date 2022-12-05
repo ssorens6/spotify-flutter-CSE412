@@ -10,11 +10,11 @@ class PostgresDatabase {
   PostgresDatabase() {
     connection = (connection == null || connection!.isClosed == true
         ? PostgreSQLConnection(
-      'spotify-flutter-db-instance.ccfp66mpr4kg.us-west-2.rds.amazonaws.com',
+      '',
       5432,
       'initial_db',
-      username: 'postgres',
-      password: 'o!tCl9D74ozR',
+      username: '',
+      password: '',
       timeoutInSeconds: 60,
       queryTimeoutInSeconds: 60,
       timeZone: 'UTC',
