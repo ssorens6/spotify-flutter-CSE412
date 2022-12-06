@@ -1,16 +1,4 @@
-# spotify_library
+# spotify_library CSE 412 Group 8
 
-A new Flutter project.
+This is a spotify-like flutter app that takes advantage of a postgres database hosted on RDS. The AWS credentials to access the database are incorrect in the code for security purposes. They can be found in the group's final report. 
 
-## Getting Started
-
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
